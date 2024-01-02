@@ -1,18 +1,12 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
-dotenv.config();
+import mongoose from "mongoose";
 
-mongoose.set("strictQuery", false);
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_DB_URL);
+    console.log(`Conneted To Mongodb Databse ${conn.connection.host}`);
+  } catch (error) {
+    console.log(`Errro in Mongodb ${error}`);
+  }
+};
 
-mongoose.connect(process.env.DB_CONNECTION);
-
-const connection = mongoose.connection;
-connection.on('connected', () => {
-  console.log('MongoDB database connection established successfully');
-});
-
-connection.on('error',()=>{
-    console.log("Error connecting to the database")
-})
-
-export default connection
+export default connectDB;
