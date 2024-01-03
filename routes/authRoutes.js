@@ -9,7 +9,7 @@ const router = express.Router();
 //routing
 
 //REGISTER 
-router.post("/register",formidable(), registerController);
+router.post("/register",formidable() , registerController);
 // Admin Registeration
 router.post('/admin/register', registerAdminController);
 //LOGIN

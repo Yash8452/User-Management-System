@@ -2,19 +2,37 @@ import userModel from '../models/userModel.js';
 import dotenv from 'dotenv';
 import fs from "fs";
 import JWT from 'jsonwebtoken'
-import  {comparePassword, hashPassword}  from '../helpers/authHelper.js';
+import { comparePassword, hashPassword } from '../helpers/authHelper.js';
+
 dotenv.config();
+
 
 // ========REGISTER-CONTROLLER========================================
 export const registerController = async (req, res) => {
   try {
+
+
     const { name, email, password, phone } = req.fields;
     const { photo } = req.files;
-    //Validations---------
 
+    //Validations--------- 
 
-
+    if (!name) {
+      return res.send({ message: "Name is Required" });
+    }
+    if (!email) {
+      return res.send({ message: "Email is Required" });
+    }
+    if (!password) {
+      return res.send({ message: "Password is Required" });
+    }
+    if (!phone) {
+      return res.send({ message: "Phone no is Required" });
+    }
+ 
     //---------------------
+
+
     const existingUser = await userModel.findOne({ email });
 
     if (existingUser) {
@@ -26,13 +44,13 @@ export const registerController = async (req, res) => {
 
     const hashedPassword = await hashPassword(password);
 
-    const newUser = new userModel({...req.fields, password: hashedPassword});
+    const newUser = new userModel({ name, email, phone, password: hashedPassword });
 
     if (photo) {
-        newUser.photo.data = fs.readFileSync(photo.path);
-        newUser.photo.contentType = photo.type;
-      }
-      await newUser.save();
+      newUser.photo.data = fs.readFileSync(photo.path);
+      newUser.photo.contentType = photo.type;
+    }
+    await newUser.save();
 
     res.status(201).send({
       success: true,
@@ -77,7 +95,7 @@ export const loginController = async (req, res) => {
     }
     //token
     console.log(process.env.JWT_SECRET_KEY)
-    const token =  JWT.sign({ _id: user._id }, process.env.JWT_SECRET_KEY, {
+    const token = JWT.sign({ _id: user._id }, process.env.JWT_SECRET_KEY, {
       expiresIn: "7d",
     });
     res.status(200).send({
@@ -110,7 +128,7 @@ export const updateUserController = async (req, res) => {
     const { photo } = req.files;
 
     const userId = req.user._id; // extract user ID from authentication 
-    
+
     // Fetch the user from the database
     const user = await userModel.findById(userId);
     if (!user) {
@@ -153,14 +171,14 @@ export const updateUserController = async (req, res) => {
       error,
     });
   }
-  
+
 };
 
 // ========DELETE-USER-========================================
 export const deleteUserController = async (req, res) => {
   try {
     //getting userID from middleware
-    const userId = req.user._id;     
+    const userId = req.user._id;
     // Find the user by ID and delete
     const deletedUser = await userModel.findByIdAndDelete(userId);
 
@@ -212,7 +230,7 @@ export const registerAdminController = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role:"Admin", //
+      role: "Admin", //
     });
 
     // Save the new admin to the database
@@ -240,7 +258,7 @@ export const registerAdminController = async (req, res) => {
 //=========GET ALL USERS=================================================
 export const getAllUsersController = async (req, res) => {
   try {
-    const users = await userModel.find({ role: 'User' },'-photo'); //find by role=user & exclude photo
+    const users = await userModel.find({ role: 'User' }, '-photo'); //find by role=user & exclude photo
 
     res.status(200).send({
       success: true,
@@ -263,7 +281,7 @@ export const updateUserControllerById = async (req, res) => {
   try {
     const userId = req.params.userId;
     const { name } = req.body;
-    const{photo} = req.fields;
+    const { photo } = req.fields;
     const user = await userModel.findById(userId);
 
     if (!user) {

@@ -1,10 +1,10 @@
 import JWT from "jsonwebtoken";
 import userModel from "../models/userModel.js";
-
+import { body } from 'express-validator';
 
 //Protected Routes token base
 export const requireSignIn = async (req, res, next) => {
-    console.log(process.env.JWT_SECRET_KEY)
+  console.log(process.env.JWT_SECRET_KEY)
   try {
     const decode = JWT.verify(
       req.headers.authorization,
@@ -38,3 +38,4 @@ export const isAdmin = async (req, res, next) => {
     });
   }
 };
+
